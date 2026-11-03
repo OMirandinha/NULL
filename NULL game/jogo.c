@@ -1,247 +1,179 @@
-
 #include <stdio.h>
 #include "jogo.h"
+#include "estruturas.h"
+#include "dados.h"
 
-/* Representa um objeto ou local que pode ser examinado. */
-typedef struct {
-    const char *nome;
-    const char *descricao;
-} Objeto;
+#define TOTAL_PISTAS 11
 
-/* Limpa os caracteres restantes da entrada. */
-void limpar_entrada(void) {
-    int caractere;
-
-    while ((caractere = getchar()) != '\n' &&
-           caractere != EOF) {
+static void limpar_entrada(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) {
         /* Descarta caracteres excedentes. */
     }
 }
 
-/* Le uma opcao numerica e trata entradas invalidas. */
-int ler_opcao(void) {
+static int ler_opcao(void) {
     int opcao;
-
     if (scanf("%d", &opcao) != 1) {
         limpar_entrada();
         return -1;
     }
-
     limpar_entrada();
     return opcao;
 }
 
-/* Introducao narrativa do jogo. */
-void apresentar_introducao(void) {
+static void apresentar_introducao(void) {
     printf("\n========================================\n");
-    printf("                 NULL\n");
-    printf("========================================\n");
-
-    printf("\nEra uma noite de chuvas fortes na mansao do Sr. Almeida.\n");
+    printf("                  NULL\n");
+    printf("========================================\n\n");
+    printf("Era uma noite de chuvas fortes na mansao do Sr. Almeida.\n");
     printf("Perto da lareira, ele ouvia musica classica e lia um livro,\n");
     printf("acompanhado de uma taca de vinho, completamente absorto.\n");
-    printf("A chuva abafava quase todos os sons, deixando apenas\n");
-    printf("os trovoes e as gotas contra as paredes da mansao.\n");
-
-    printf("\nBruno estava em uma videoconferencia com seus agentes financeiros.\n");
+    printf("A chuva abafava quase todos os sons, deixando apenas os\n");
+    printf("trovoes e as gotas contra as paredes da mansao.\n\n");
+    printf("Bruno estava em uma videoconferencia com seus agentes financeiros.\n");
     printf("Daniel preparava o cha do Sr. Almeida na cozinha.\n");
     printf("Carla repousava na cama, em mais um sono leve.\n");
-    printf("Elisa caminhava pela cupula fechada do jardim, envolta em sombras.\n");
-
-    printf("\nDe repente, a energia caiu.\n");
-    printf("Durante dez minutos, a mansao permaneceu na escuridao.\n");
-    printf("Quando a energia voltou, o Sr. Almeida estava morto,\n");
-    printf("sentado em sua cadeira, com uma bala no coracao.\n");
-
-    printf("\nQuatro suspeitos. Uma vitima. Dez minutos sem luz.\n");
-    printf("Sua missao e explorar a mansao e investigar o ocorrido.\n");
-
-    printf("\nPressione ENTER para continuar...");
+    printf("Elisa caminhava como uma sombra pelo jardim coberto.\n\n");
+    printf("De repente, a energia caiu. Dez minutos depois, quando\n");
+    printf("a luz voltou, o Sr. Almeida estava morto em sua poltrona,\n");
+    printf("atingido por um disparo no coracao.\n\n");
+    printf("Quatro suspeitos. Uma mansao. Uma verdade escondida.\n");
+    printf("Explore os comodos, examine os objetos e reuna as evidencias.\n");
+    printf("A investigacao tem uma solucao: descubra o que Elisa tentou ocultar.\n");
+    printf("\nPressione ENTER para iniciar...");
     getchar();
 }
 
-/* Objetos que podem ser examinados no hall. */
-static const Objeto hall[] = {
-    {"Porta principal", "A porta e robusta e esta fechada."},
-    {"Tapete", "O tapete ocupa boa parte da entrada da mansao."},
-    {"Relogio de parede", "O relogio antigo marca as horas em silencio."},
-    {"Escadaria", "Uma escadaria leva ao andar superior."}
-};
+static void examinar_objeto(Objeto *obj, Inventario *inv) {
+    int resultado;
 
-/* Objetos da biblioteca. */
-static const Objeto biblioteca[] = {
-    {"Estantes", "As estantes estao repletas de livros antigos."},
-    {"Poltrona", "Uma poltrona esta posicionada perto da lareira."},
-    {"Lareira", "As brasas ainda iluminam discretamente o ambiente."},
-    {"Janela", "A chuva escorre pelo vidro da janela."}
-};
+    printf("\n--- %s ---\n", obj->nome);
+    printf("%s\n", obj->descricao);
 
-/* Objetos do quarto do casal. */
-static const Objeto quarto[] = {
-    {"Cama", "A cama esta parcialmente desarrumada."},
-    {"Criado-mudo", "Ha alguns objetos pessoais sobre o movel."},
-    {"Guarda-roupa", "O guarda-roupa esta fechado."},
-    {"Penteadeira", "Perfumes e pequenos acessorios estao organizados aqui."}
-};
-
-/* Objetos da cozinha. */
-static const Objeto cozinha[] = {
-    {"Bancada", "A bancada esta limpa, com alguns utensilios sobre ela."},
-    {"Chaleira", "A chaleira repousa perto do fogao."},
-    {"Armarios", "Os armarios guardam loucas e mantimentos."},
-    {"Pia", "Algumas gotas de agua escorrem pela pia."}
-};
-
-/* Objetos do escritorio do Sr. Almeida. */
-static const Objeto escritorio[] = {
-    {"Mesa", "A mesa esta coberta de documentos e materiais de trabalho."},
-    {"Computador", "O computador esta desligado."},
-    {"Estante", "Pastas e livros ocupam as prateleiras."},
-    {"Cofre", "Um cofre esta embutido na parede."}
-};
-
-/* Objetos do porao. */
-static const Objeto porao[] = {
-    {"Quadro eletrico", "O quadro eletrico controla parte da energia da mansao."},
-    {"Caixa de ferramentas", "Uma caixa com ferramentas esta encostada na parede."},
-    {"Armario antigo", "Um armario empoeirado ocupa o canto do porao."},
-    {"Escada", "A escada leva de volta ao interior da mansao."}
-};
-
-/* Retorna os objetos disponiveis em cada sala. */
-const Objeto *obter_objetos(int sala, int *quantidade) {
-    switch (sala) {
-        case 1:
-            *quantidade = (int)(sizeof(hall) / sizeof(hall[0]));
-            return hall;
-
-        case 2:
-            *quantidade = (int)(sizeof(biblioteca) / sizeof(biblioteca[0]));
-            return biblioteca;
-
-        case 3:
-            *quantidade = (int)(sizeof(quarto) / sizeof(quarto[0]));
-            return quarto;
-
-        case 4:
-            *quantidade = (int)(sizeof(cozinha) / sizeof(cozinha[0]));
-            return cozinha;
-
-        case 5:
-            *quantidade = (int)(sizeof(escritorio) / sizeof(escritorio[0]));
-            return escritorio;
-
-        case 6:
-            *quantidade = (int)(sizeof(porao) / sizeof(porao[0]));
-            return porao;
-
-        default:
-            *quantidade = 0;
-            return NULL;
-    }
-}
-
-/* Mostra uma interacao basica com o objeto escolhido. */
-void examinar_objeto(const Objeto *objeto) {
-    printf("\n--- %s ---\n", objeto->nome);
-    printf("%s\n", objeto->descricao);
-}
-
-/* Permite ao jogador examinar objetos dentro de uma sala. */
-void interagir_sala(int sala) {
-    int quantidade = 0;
-    int opcao;
-    int i;
-
-    const Objeto *objetos = obter_objetos(sala, &quantidade);
-
-    if (objetos == NULL || quantidade == 0) {
-        printf("Sala invalida.\n");
+    if (obj->investigado) {
+        printf("Voce ja examinou este objeto.\n");
         return;
     }
 
+    if (obj->idPista == 0 || obj->pista == NULL) {
+        obj->investigado = true;
+        printf("Voce nao encontrou nenhuma evidencia relevante aqui.\n");
+        return;
+    }
+
+    resultado = inserir_pista(inv, obj->idPista, obj->pista);
+    if (resultado == 1) {
+        obj->investigado = true;
+        printf("\n[NOVA EVIDENCIA] %s\n", obj->pista);
+        printf("Evidencias coletadas: %d de %d\n", inv->quantidade, TOTAL_PISTAS);
+    } else if (resultado == 0) {
+        obj->investigado = true;
+        printf("Essa evidencia ja esta registrada no inventario.\n");
+    } else {
+        printf("Nao foi possivel armazenar a evidencia. Tente novamente.\n");
+    }
+}
+
+static void explorar_sala(int sala, Inventario *inv) {
+    int quantidade = 0;
+    int opcao, i;
+    Objeto *objetos = obter_objetos(sala, &quantidade);
+
+    if (objetos == NULL || quantidade == 0) return;
+
     do {
-        printf("\n======= EXPLORAR SALA =======\n");
-
+        printf("\n========================================\n");
+        printf("  %s\n", nome_sala(sala));
+        printf("========================================\n");
         for (i = 0; i < quantidade; i++) {
-            printf("%d. Examinar %s\n", i + 1, objetos[i].nome);
+            printf("  [%d] %s%s\n", i + 1, objetos[i].nome,
+                   objetos[i].investigado ? " (examinado)" : "");
         }
-
-        printf("0. Voltar para as salas\n");
-        printf("Escolha uma interacao: ");
+        printf("  [0] Voltar ao mapa da mansao\n");
+        printf("----------------------------------------\n");
+        printf("Evidencias coletadas: %d de %d\n", inv->quantidade, TOTAL_PISTAS);
+        printf("Escolha um objeto: ");
 
         opcao = ler_opcao();
-
         if (opcao >= 1 && opcao <= quantidade) {
-            examinar_objeto(&objetos[opcao - 1]);
-        } else if (opcao == 0) {
-            printf("\nVoce saiu da sala.\n");
-        } else {
-            printf("\nOpcao invalida. Tente novamente.\n");
+            examinar_objeto(&objetos[opcao - 1], inv);
+        } else if (opcao != 0) {
+            printf("Opcao invalida. Tente novamente.\n");
         }
-
     } while (opcao != 0);
 }
 
-/* Menu de navegacao da mansao. */
-void iniciar_investigacao(void) {
-    int sala = -1;
-
-    apresentar_introducao();
-
-    while (sala != 0) {
-        printf("\n========== MANSÃO ==========\n");
-        printf("1. Hall de entrada\n");
-        printf("2. Biblioteca\n");
-        printf("3. Quarto do casal\n");
-        printf("4. Cozinha\n");
-        printf("5. Escritorio do Sr. Almeida\n");
-        printf("6. Porao\n");
-        printf("0. Voltar ao menu principal\n");
-        printf("Escolha uma sala: ");
-
-        sala = ler_opcao();
-
-        if (sala >= 1 && sala <= 6) {
-            interagir_sala(sala);
-        } else if (sala == 0) {
-            printf("\nVoce voltou ao menu principal.\n");
-        } else {
-            printf("\nOpcao invalida. Escolha um numero de 0 a 6.\n");
-        }
-    }
+static void revelar_desfecho(const Inventario *inv) {
+    printf("\n========================================\n");
+    printf("          CONCLUSAO DA INVESTIGACAO\n");
+    printf("========================================\n\n");
+    printf("Ao reunir as evidencias, voce percebe que a queda de energia\n");
+    printf("foi provocada manualmente. As pegadas ligam o jardim ao porao,\n");
+    printf("e o brinco e o bilhete encontrados no jardim apontam para Elisa.\n\n");
+    printf("O motivo estava relacionado aos negocios do Sr. Almeida.\n");
+    printf("Elisa temia que ele revelasse um acordo que colocaria seus\n");
+    printf("planos em risco. Aproveitando os dez minutos de escuridao,\n");
+    printf("ela entrou na biblioteca e atirou contra o Sr. Almeida.\n\n");
+    printf("A CULPADA E ELISA.\n");
+    printf("Carla, Bruno e Daniel eram suspeitos, mas as evidencias\n");
+    printf("nao os colocam como autores do assassinato.\n\n");
+    printf("Voce encontrou %d de %d evidencias.\n", inv->quantidade, TOTAL_PISTAS);
+    printf("                 FIM\n");
 }
 
-/* Menu principal do jogo. */
+static void exibir_menu(void) {
+    printf("\n========================================\n");
+    printf("          MANSÃO DO SR. ALMEIDA\n");
+    printf("========================================\n");
+    printf("  [1] Hall de Entrada\n");
+    printf("  [2] Biblioteca\n");
+    printf("  [3] Quarto de Carla\n");
+    printf("  [4] Cozinha\n");
+    printf("  [5] Escritorio\n");
+    printf("  [6] Porao\n");
+    printf("  [7] Jardim Coberto\n");
+    printf("  [8] Consultar evidencias\n");
+    printf("  [0] Encerrar investigacao\n");
+    printf("----------------------------------------\n");
+    printf("Escolha uma opcao: ");
+}
+
 void executar_jogo(void) {
-    int opcao = -1;
+    Inventario inv;
+    int opcao;
+    int desfecho_exibido = 0;
 
-    while (opcao != 0) {
-        printf("\n========================================\n");
-        printf("          NULL - INVESTIGACAO\n");
-        printf("========================================\n");
-        printf("1. Iniciar investigacao\n");
-        printf("0. Sair do jogo\n");
-        printf("Escolha uma opcao: ");
+    inicializar_inventario(&inv);
+    apresentar_introducao();
 
+    do {
+        exibir_menu();
         opcao = ler_opcao();
 
-        switch (opcao) {
-            case 1:
-                iniciar_investigacao();
-                break;
-
-            case 0:
-                printf("\nObrigado por jogar NULL!\n");
-                printf("Encerrando o jogo...\n");
-                break;
-
-            case -1:
-                printf("\nEntrada invalida. Digite um numero.\n");
-                break;
-
-            default:
-                printf("\nOpcao invalida. Tente novamente.\n");
+        if (opcao >= 1 && opcao <= 7) {
+            explorar_sala(opcao, &inv);
+        } else if (opcao == 8) {
+            exibir_pistas(&inv);
+        } else if (opcao == 0) {
+            printf("\nEncerrando a investigacao...\n");
+        } else {
+            printf("Opcao invalida. Digite um numero de 0 a 8.\n");
         }
+
+        /* O final e unico e acontece automaticamente quando todas as evidencias sao coletadas. */
+        if (inv.quantidade == TOTAL_PISTAS && !desfecho_exibido) {
+            revelar_desfecho(&inv);
+            desfecho_exibido = 1;
+            opcao = 0;
+        }
+    } while (opcao != 0);
+
+    if (!desfecho_exibido) {
+        printf("\nInvestigacao encerrada antes de todas as evidencias serem encontradas.\n");
+        printf("Evidencias coletadas: %d de %d.\n", inv.quantidade, TOTAL_PISTAS);
     }
+
+    liberar_inventario(&inv);
+    printf("Memoria do inventario liberada. Obrigado por jogar NULL!\n");
 }
