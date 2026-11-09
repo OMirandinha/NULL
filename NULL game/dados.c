@@ -61,13 +61,14 @@ static Objeto porao[] = {
 static Objeto jardim[] = {
     {"Porta de vidro", "A porta de vidro que liga o jardim ao corredor esta entreaberta.", 0, NULL, false},
     {"Vasos de plantas", "Alguns vasos foram deslocados e ha terra espalhada no piso.",
-     9, "As marcas na terra formam pegadas que saem do jardim e seguem em direcao ao corredor do porao. O tamanho e o desenho coincidem com as marcas de um sapato encontrado no quarto de hospedes usado por Elisa.", false},
+     9, "As marcas na terra formam pegadas que saem do jardim e seguem em direcao ao corredor do porao. Daniel reconhece o desenho da sola: e igual ao das botas que viu Elisa usando naquela noite.", false},
     {"Banco de pedra", "O banco esta molhado, apesar de ficar sob a cobertura.",
      10, "Debaixo do banco ha um brinco. Carla confirma que nao e dela; Daniel diz ter visto Elisa usando um par igual naquela noite.", false},
     {"Mesa de jardinagem", "Sobre a mesa ha luvas e pequenos utensilios de jardinagem.",
-     11, "Sob a mesa ha um bilhete amassado, escrito por Elisa: 'Depois que Almeida assinar, ninguem podera nos impedir'. A frase sugere um motivo ligado aos negocios da vitima.", false}
+     11, "Sob a mesa ha um bilhete amassado, escrito por Elisa: 'Depois que Almeida assinar, ninguem podera nos impedir'. A frase sugere um motivo ligado aos negocios da vitima e mostra que Elisa tinha interesse direto em pressionar Almeida.", false}
 };
 
+/* Seleciona o vetor de objetos da sala; os vetores permanecem neste modulo. */
 Objeto *obter_objetos(int sala, int *quantidade) {
     if (quantidade == NULL) return NULL;
 
@@ -83,6 +84,7 @@ Objeto *obter_objetos(int sala, int *quantidade) {
     }
 }
 
+/* Centraliza os nomes dos comodos para manter o menu consistente. */
 const char *nome_sala(int sala) {
     switch (sala) {
         case 1: return "Hall de Entrada";
