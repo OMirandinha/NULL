@@ -1,3 +1,5 @@
+//Desenvolvido por Vitor Hugo e Paulo Takeshi
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
