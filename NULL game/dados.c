@@ -1,3 +1,5 @@
+//Desenvolvido por Vitor Hugo e Paulo Takeshi
+
 #include <stddef.h>
 #include "dados.h"
 
