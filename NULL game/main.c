@@ -1,3 +1,5 @@
+//Desenvolvido por Vitor Hugo e Paulo Takeshi
+
 /* Ponto de entrada do programa: inicia o jogo e encerra a execucao. */
 #include "jogo.h"
 
